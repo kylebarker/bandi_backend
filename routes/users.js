@@ -28,22 +28,30 @@ router.post('/create', function(req,res,next) {
 
 /*LOGIN USER*/
 router.post('/login', function(req,res,next) {
-  knex.raw(`SELECT * FROM WHERE email = '${req.body.email}'`)
+  knex.raw(`select * from users where email = ${req.body.email}`)
     .then(user => {
+      var dataPassword = `'${user.rows[0].password}'`
+      var userPassword = req.body.password
       var userid = user.rows[0].id
-
-      bcrypt.compare(req.body.password, user.rows[0].password, function(err, resp){
-        if(resp){
-          /* get use info */
-        }
-      })
+      console.log(user.rows[0])
+      console.log('data password', dataPassword)
+      console.log('User Password', userPassword)
+      console.log('should be true', dataPassword === userPassword)
+      if(dataPassword === userPassword){
+        knex.raw(`select users.id, users.first_name, users.age, users.city, users.zip_code,users.description, users.influences, instrument_type.name as instrument, music_genres.name as genre from playable_instruments, users, instrument_type, music_genres, favorite_genres where playable_instruments.instrument_id = instrument_type.id and playable_instruments.user_id = users.id and favorite_genres.genre_id = music_genres.id and favorite_genres.user_id = users.id and users.id = ${userid}`)
+          .then(data => {
+            console.log('get user data', data.rows)
+            res.json(data.rows)
+          })
+      }
     })
 })
 
 /* Get user info */
-router.get('/:id', function(req, res, next) {
-  knex.raw(`select users.id, users.first_name, users.age, users.city, users.zip_code,users.description, users.influences, instrument_type.name as instrument, music_genres.name as genre from playable_instruments, users, instrument_type, music_genres, favorite_genres where playable_instruments.instrument_id = instrument_type.id and playable_instruments.user_id = users.id and favorite_genres.genre_id = music_genres.id and favorite_genres.user_id = users.id and users.id = ${req.params.id}`)
+router.get('/:email', function(req, res, next) {
+  knex.raw(`select users.id, users.first_name, users.age, users.city, users.zip_code,users.description, users.influences, instrument_type.name as instrument, music_genres.name as genre from playable_instruments, users, instrument_type, music_genres, favorite_genres where playable_instruments.instrument_id = instrument_type.id and playable_instruments.user_id = users.id and favorite_genres.genre_id = music_genres.id and favorite_genres.user_id = users.id and users.email = '${req.params.email}'`)
     .then(data => {
+      console.log('get user data', data.rows)
       res.json(data.rows)
     })
 })

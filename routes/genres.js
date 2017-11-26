@@ -20,9 +20,9 @@ router.get('/favorites', function(req, res, next) {
 
 
 router.get('/:id', function(req, res, next) {
-  knex.raw(`SELECT * FROM music_genres where id = ${req.params.id}`)
+  knex.raw(`SELECT music_genres.name as genre, * FROM favorite_genres join music_genres on genre_id = music_genres.id join users on user_id = users.id where user_id = ${req.params.id}`)
     .then(data => {
-      res.json(data.rows[0])
+      res.json(data.rows)
     })
 })
 
