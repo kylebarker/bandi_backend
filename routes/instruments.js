@@ -35,14 +35,6 @@ router.post('/:userid', function(req,res,next){
     })
 })
 
-router.delete('/:instrumentid/:userid', function (req,res){
-  knex.raw(`DELETE from playable_instruments where instrument_id = ${req.params.instrumentid} and user_id = ${req.params.userid}`)
-    .then(data => {
-      res.send('SUCCESS')
-    })
-})
-
-
 
 
 
