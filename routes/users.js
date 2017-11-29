@@ -14,17 +14,13 @@ router.get('/', function(req, res, next) {
 
 /* CREATE USER */
 router.post('/create', function(req,res,next) {
-  console.log(req.body);
-  // bcrypt.hash(req.body.password, 8, function(err, hash){
-    knex('users')
-      .returning('id')
-      .insert({email: `${req.body.email}`, password: `${req.body.password}`})
-      .then(function(data){
-        res.send(data)
-    })
-  // })
+  knex('users')
+    .returning('id')
+    .insert({email: `${req.body.email}`, password: `${req.body.password}`})
+    .then(function(data){
+      res.send(data)
+  })
 })
-
 
 /*LOGIN USER*/
 router.post('/login', function(req,res,next) {
@@ -36,22 +32,30 @@ router.post('/login', function(req,res,next) {
       if(dataPassword === userPassword){
         knex.raw(`select users.id, users.first_name, users.age, users.city, users.zip_code,users.description, users.influences, instrument_type.name as instrument from playable_instruments, users, instrument_type where playable_instruments.instrument_id = instrument_type.id and playable_instruments.user_id = users.id and users.id = ${userid}`)
           .then(data => {
-            console.log('get user data', data.rows)
             res.json(data.rows)
           })
       }
     })
 })
 
+
+
 /* GET USER INFO */
 router.get('/:email', function(req, res, next) {
   knex.raw(`select users.id, users.first_name, users.age, users.city, users.zip_code,users.description, users.influences, instrument_type.name as instrument from playable_instruments, users, instrument_type where playable_instruments.instrument_id = instrument_type.id and playable_instruments.user_id = users.id and users.email = '${req.params.email}'`)
     .then(data => {
-      console.log('get user data', data.rows)
       res.json(data.rows)
     })
 })
 
+
+/* EDIT USER */
+router.post('/:id/edit', function(req,res,next){
+  knex.raw(`UPDATE users set first_name = '${req.body.first_name}', age = '${req.body.age}', city = '${req.body.city}', zip_code = '${req.body.zip_code}', description = '${req.body.description}', influences = '${req.body.influences}' where id = ${req.params.id}`)
+     .then(stuff => {
+      res.send(stuff)
+    })
+})
 
 /* GET SEARCH USERS */
 router.get('/:id/search', function(req,res,next){
@@ -72,7 +76,6 @@ where 	(users.city = ${req.query.city} or users.zip_code = ${req.query.zip_code}
     })
 })
 
-
 /* GET A USERS DATA */
 router.get('/:id/user', function(req,res,next){
   knex.raw(`select
@@ -90,7 +93,6 @@ router.get('/:id/user', function(req,res,next){
         res.json(data.rows)
       })
 })
-
 
 /* GET MATCHED USERS */
 router.get('/:id/matched', function(req,res,next){
@@ -158,8 +160,5 @@ router.post('/:id/message/:mid', function(req,res,next){
       res.send(data)
     })
 })
-
-
-
 
 module.exports = router;
